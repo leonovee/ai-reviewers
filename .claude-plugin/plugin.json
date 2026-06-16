@@ -1,0 +1,11 @@
+{
+  "name": "ai-reviewers",
+  "displayName": "AI Reviewers",
+  "version": "1.0.0",
+  "description": "Independent external code-review subagents (Codex, Kimi, agy/Gemini-family, DeepSeek) with a shared trust model, severity scale, and defensive CLI-success detection. Reviewers are advisors, not authors — they produce audit artifacts, never commit findings.",
+  "author": { "name": "Vladimir" },
+  "homepage": "https://github.com/leonovee/ai-reviewers",
+  "repository": "https://github.com/leonovee/ai-reviewers",
+  "license": "MIT",
+  "keywords": ["code-review", "codex", "gemini", "kimi", "deepseek"]
+}

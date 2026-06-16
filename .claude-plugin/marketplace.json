@@ -1,0 +1,12 @@
+{
+  "name": "ai-reviewers-marketplace",
+  "owner": { "name": "Vladimir" },
+  "plugins": [
+    {
+      "name": "ai-reviewers",
+      "source": ".",
+      "description": "External code-review agents (Codex, Kimi, agy/Gemini-family, DeepSeek) + shared external-review skill",
+      "version": "1.0.0"
+    }
+  ]
+}
