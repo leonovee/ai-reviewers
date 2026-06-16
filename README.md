@@ -103,6 +103,22 @@ tool prints an auth prompt or an OAuth URL instead of a review, that is a STOP �
 the reviewer surfaces it verbatim and you re-auth (re-auth needs a browser /
 your own terminal).
 
+## Configuration (`.env.example`)
+
+Copy **`.env.example`** and fill in only the reviewers you use. Two kinds of knobs:
+
+- **API-key reviewers** — set the key to enable: `MOONSHOT_API_KEY` (Kimi),
+  `DEEPSEEK_API_KEY` (DeepSeek).
+- **Subscription reviewers** — no key; they auth via their own CLI login/OAuth.
+  Set a flag so the plugin knows you have the subscription (and skips the ones you
+  don't): `OPENAI_SUBSCRIPTION=true` (Codex, after `codex login`),
+  `GOOGLE_SUBSCRIPTION=true` (agy/Gemini, after the agy device-auth).
+
+A reviewer whose key/flag is absent reports **"not configured — set X"** and is
+skipped cleanly, rather than failing mid-run. Put the values in your shell profile
+(`~/.bashrc`) or a project `.env` and `source` it before launching Claude Code
+(child processes inherit the environment at launch).
+
 ## Install
 
 This repository is itself the marketplace (both `.claude-plugin/marketplace.json`

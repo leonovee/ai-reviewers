@@ -82,8 +82,15 @@ This reviewer exists for model-family DIVERSITY; a Claude/GPT pick collapses it.
 
 **Fallback:** if `Gemini 3.1 Pro (High)` is rejected or overloaded (quota / 5xx),
 fall back to `Gemini 3.5 Flash (High)` and warn verbatim in the artifact and the
-reply. Re-confirm any new name against `agy models` before pinning it — never
-hardcode a name not listed there.
+reply, using this exact template (mirrors `codex-reviewer.md`):
+
+```
+NOTE: Gemini 3.1 Pro (High) unavailable via agy (rejected/overloaded); fell back to Gemini 3.5 Flash (High).
+Raw error: <agy error text>
+```
+
+Re-confirm any new name against `agy models` before pinning it — never hardcode a
+name not listed there.
 
 ## Install (Linux)
 

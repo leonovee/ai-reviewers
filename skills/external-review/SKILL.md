@@ -256,8 +256,27 @@ This plugin carries **no secrets**. Each tool authenticates per machine:
   var for the API fallback path.
 - **DeepSeek** — `DEEPSEEK_API_KEY` env var.
 
+### Configuration knobs (`.env.example`)
+
+The plugin ships an `.env.example` listing every auth knob; the user copies the
+ones they need into their shell profile (`~/.bashrc`) or a project `.env`. Two kinds:
+
+- **API-key reviewers** — set the key to enable: `MOONSHOT_API_KEY` (Kimi),
+  `DEEPSEEK_API_KEY` (DeepSeek).
+- **Subscription reviewers** — no key; they auth via their own CLI login/OAuth. A
+  flag tells the plugin the user HAS that subscription, so it runs that reviewer and
+  skips the ones they don't have: `OPENAI_SUBSCRIPTION=true` (Codex, after
+  `codex login`), `GOOGLE_SUBSCRIPTION=true` (agy/Gemini, after the agy device-auth).
+
+**Skip-if-unconfigured (mandatory):** before invoking, a reviewer checks its own
+knob — its API-key env var, or its subscription flag (`OPENAI_SUBSCRIPTION` for
+codex, `GOOGLE_SUBSCRIPTION` for agy). If the knob is absent/false, the reviewer
+reports **"not configured — set `<KNOB>` (see `.env.example`)"** and exits cleanly,
+rather than running the CLI and failing cryptically. A configured-but-rejected auth
+(the CLI prints a login/OAuth URL at run time) is still the STOP below.
+
 NEVER echo a key, NEVER print a token file. On a new machine: install the
-plugin, then redo each CLI's login / set each API-key env var once. If a tool
+plugin, set the knobs once (copy `.env.example`), redo each CLI's login. If a tool
 prints an auth prompt / OAuth URL instead of a review, that is a STOP — surface
 it verbatim (re-auth needs a human / a browser); do not attempt to auth on the
 human's behalf.
