@@ -18,6 +18,35 @@ commits, and never invent output for a CLI run that did not actually produce it.
 
 ---
 
+## 0. Max-model policy (ALWAYS use the strongest model)
+
+**Every reviewer ALWAYS runs its strongest available model.** This is a hard
+policy, not a per-call choice — review quality is the whole point, and review is
+an infrequent, deliberate event, so cost/speed never justify a weaker model
+here. The pinned model per reviewer:
+
+| Reviewer | Always-on model | One-tier fallback (on reject/overload only) |
+|----------|-----------------|---------------------------------------------|
+| **codex** | `gpt-5.5-codex` (strongest codex) | CLI default (`-m` dropped) |
+| **agy / Gemini** | `Gemini 3.1 Pro (High)` | `Gemini 3.5 Flash (High)` |
+| **kimi** | `kimi-k2.7-code` + `--thinking` | `kimi-k2.6` (API path) |
+| **deepseek** | `deepseek-v4-pro` (reasoning) | `deepseek-chat` |
+
+Rules:
+
+- **agy MUST stay in the Gemini family** — never pick Claude or GPT-OSS from
+  `agy models`. The reviewer's value is model-family DIVERSITY (different family
+  from the host session and from Codex); a Claude/GPT pick collapses it.
+- A reviewer drops to its fallback **only** when the top model is rejected
+  (unknown/unavailable) or overloaded (429/5xx) — and then emits a **verbatim
+  fallback warning** in the artifact and the reply, so a degraded run is never
+  silent.
+- When a stronger model ships, bump the pin here (and in the reviewer's
+  `## Model selection`) — this table is the single source of truth for "which
+  model."
+
+---
+
 ## 1. The reviews directory (`<reviews-dir>`)
 
 Every artifact is written to a single per-project reviews directory, referred
@@ -218,8 +247,11 @@ Diff:
 This plugin carries **no secrets**. Each tool authenticates per machine:
 
 - **Codex** — subscription login (`codex login`), machine-local CLI state.
-- **agy / Gemini-family** — subscription OAuth, token persisted as a plain file
-  on the machine.
+- **agy / Gemini-family** — subscription OAuth. No `agy login` subcommand — auth
+  fires on first run; on a headless box/container use the **device-authorization**
+  flow (agy prints an auth URL + one-time code; approve on another device). Token
+  storage is version/OS-dependent (a file under `~/.gemini/antigravity-cli/`,
+  and/or an encrypted `credentials.enc` / system keyring) — do not hard-assert one.
 - **Kimi** — CLI login (`kimi login`) for the CLI path; `MOONSHOT_API_KEY` env
   var for the API fallback path.
 - **DeepSeek** — `DEEPSEEK_API_KEY` env var.

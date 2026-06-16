@@ -11,6 +11,23 @@ returns a severity-tagged summary. They never edit your source, never author
 fix-up commits, and never invent output for a CLI run that did not actually
 produce it.
 
+## Always the strongest model
+
+**Every reviewer ALWAYS runs its strongest available model** — review quality is
+the whole point, and review is an infrequent, deliberate event, so cost/speed
+never justify a weaker model here. The pins:
+
+| Reviewer | Always-on model | Fallback (only on reject/overload, with a loud warning) |
+|----------|-----------------|----------------------------------------------------------|
+| **codex** | `gpt-5.5-codex` | CLI default |
+| **agy / Gemini** | `Gemini 3.1 Pro (High)` (always a Gemini — never Claude/GPT-OSS via agy) | `Gemini 3.5 Flash (High)` |
+| **kimi** | `kimi-k2.7-code` + `--thinking` | `kimi-k2.6` |
+| **deepseek** | `deepseek-v4-pro` | `deepseek-chat` |
+
+A reviewer steps down to its fallback only when the top model is rejected or
+overloaded, and says so verbatim — a degraded run is never silent. The single
+source of truth for these pins is the `external-review` skill (§0).
+
 ## What's inside
 
 ```
@@ -73,8 +90,9 @@ an artifact, and surfaces any CLI error verbatim.
 **The plugin carries NO secrets.** Each tool authenticates per machine:
 
 - **Codex** — subscription login (`codex login`).
-- **agy / Gemini-family** — subscription OAuth (token stored as a plain file on
-  the machine).
+- **agy / Gemini-family** — subscription OAuth. No `agy login` subcommand — auth
+  fires on first run; on a headless box/container it is the **device-authorization**
+  flow (agy prints an auth URL + one-time code, approved on another device).
 - **Kimi** — CLI login (`kimi login`) for the CLI path; `MOONSHOT_API_KEY` env
   var for the API fallback.
 - **DeepSeek** — `DEEPSEEK_API_KEY` env var.

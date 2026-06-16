@@ -70,22 +70,61 @@ AGY_EXIT=$?
   `--add-dir <repo-root>` so `agy` can read files directly, and describe the
   scope in the prompt.
 
-## Model selection
+## Model selection (max-model policy — see the skill §0)
 
-`agy` runs Gemini-family models. List them with `agy models`. Use the CLI
-**default** unless the human pins one via `--model <name>`; do NOT hardcode a
-model name without confirming it appears in `agy models`. If a pinned `--model`
-is rejected, drop the flag, fall back to the default, and warn verbatim.
+**Always pin `--model "Gemini 3.1 Pro (High)"`** — the strongest reasoning Gemini
+in `agy models`, the right fit for this reviewer's role (prompt-engineering +
+architectural sweeps). The `--model` value is the exact human string as listed by
+`agy models`.
 
-## Auth
+**Stay in the Gemini family — never pick Claude or GPT-OSS from `agy models`.**
+This reviewer exists for model-family DIVERSITY; a Claude/GPT pick collapses it.
 
-Subscription OAuth. The token is persisted as a plain file at
-`~/.gemini/antigravity-cli/antigravity-oauth-token` and survives non-interactive
-runs (no keyring / D-Bus dependency), so a headless run does NOT re-prompt. If
-`agy` instead prints `Authentication required` / an
-`accounts.google.com/o/oauth2/auth` URL, the token is missing/expired — STOP and
-surface that verbatim (re-auth needs a browser; do not attempt it). NEVER print
-the token file.
+**Fallback:** if `Gemini 3.1 Pro (High)` is rejected or overloaded (quota / 5xx),
+fall back to `Gemini 3.5 Flash (High)` and warn verbatim in the artifact and the
+reply. Re-confirm any new name against `agy models` before pinning it — never
+hardcode a name not listed there.
+
+## Install (Linux)
+
+`agy` is Google's **Antigravity** CLI — a standalone binary, NOT npm/pip. Verified install:
+
+```bash
+curl -fsSL https://antigravity.google/cli/install.sh | bash
+export PATH="$HOME/.local/bin:$PATH"   # add to ~/.bashrc — binary lands at ~/.local/bin/agy, often off PATH
+agy --version
+```
+
+(Windows alt, for reference: `irm https://antigravity.google/cli/install.ps1 | iex`.)
+
+## Auth — including DEVICE AUTHORIZATION (headless)
+
+Subscription OAuth. There is **NO `agy login` subcommand** — auth fires on the
+**first run** of `agy`.
+
+- **Desktop (browser present):** the first run opens a Google consent page; pick
+  the account and approve.
+- **Device authorization (headless / SSH / container):** with no local browser
+  the first run **prints an authorization URL + a one-time code** — open the URL
+  on any device with a browser, sign in, enter the code, approve. Do this ONCE
+  per machine; subsequent `agy -p` runs are non-interactive.
+
+```bash
+agy                 # first headless run → prints auth URL + one-time code
+# open the URL on another device, sign in, enter the code, approve
+agy -p "ping"       # subsequent runs do not re-prompt
+```
+
+**Token storage:** version/OS-dependent — observed as a file under
+`~/.gemini/antigravity-cli/` (no keyring re-prompt on a headless box), while
+Google's docs also describe an encrypted `credentials.enc` and/or a system
+keyring (libsecret on Linux). Do NOT hard-assert one mechanism. **NEVER print the
+token file.** API-key alt for CI: `ANTIGRAVITY_API_KEY` env var.
+
+At review time, if `agy` prints `Authentication required` / an
+`accounts.google.com/o/oauth2/auth` (or device-code) URL instead of a review, the
+token is missing/expired — STOP and surface that verbatim (re-auth needs a
+browser via the device flow above; do not attempt it).
 
 ## Success detection (defensive — mandatory)
 

@@ -45,9 +45,11 @@ a temp file, then:
 ```bash
 RAW_OUT="<reviews-dir>/codex_<phase>_<UTC>.md"
 RAW_ERR="$(mktemp)"
-cat "$PROMPT_FILE" | codex exec -o "$RAW_OUT" 2> "$RAW_ERR"
+cat "$PROMPT_FILE" | codex exec -m gpt-5.5-codex -o "$RAW_OUT" 2> "$RAW_ERR"
 CODEX_EXIT=$?
 ```
+
+(Drop `-m gpt-5.5-codex` and re-run only if the CLI rejects it — see Model selection.)
 
 - `-o <path>` writes Codex's final message to the file. (Use `--json` instead of
   `-o` if you want the full JSONL event stream.)
@@ -56,18 +58,20 @@ CODEX_EXIT=$?
   read-only review. If a sandboxed run is ever required, prefer `-s read-only`
   / `-a never`.
 
-## Model selection
+## Model selection (max-model policy — see the skill §0)
 
-Use the CLI's **configured default** — i.e. NO `-m` flag at all. The
-ChatGPT-account (subscription) `codex exec` rejects a space-separated
-`model effort` form as an unknown model. If a specific model is genuinely
-required, pass a single hyphenated id (e.g. `-m <model-id>`, no embedded effort
-string). If a passed `-m` is rejected (`unknown model`,
-`model unavailable on your plan`), drop `-m` entirely, fall back to the CLI
-default, and warn verbatim in the artifact and the reply:
+**Always prefer `-m gpt-5.5-codex`** — the strongest codex model on the
+subscription (hyphenated id, NO embedded effort string). Do NOT pass a
+space-separated `model effort` form (e.g. `"gpt-5.5 xhigh"`) — the
+ChatGPT-account `codex exec` rejects it as an unknown model.
+
+**Fallback:** if `-m gpt-5.5-codex` is rejected (`unknown model`,
+`model unavailable on your plan`), drop `-m` entirely (the CLI's configured
+default is already the strong codex tier on the subscription) and warn verbatim
+in the artifact and the reply:
 
 ```
-NOTE: <model> rejected by codex CLI; fell back to the CLI default (no -m).
+NOTE: gpt-5.5-codex rejected by codex CLI; fell back to the CLI default (no -m).
 Raw error: <CLI error text>
 ```
 
